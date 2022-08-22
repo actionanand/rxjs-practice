@@ -25,11 +25,14 @@ export class AboutComponent implements OnInit {
 
 
     // merge observable; output: 0, 0, 1, 10, 2, 20, 3, 30 ...
-    // const interval1$ = interval(1000);
-    // const interval2$ = interval1$.pipe(map(val => val * 10));
-    // const intervalResult$ = merge(interval1$, interval2$);
+    const interval1$ = interval(1000);
+    const interval2$ = interval1$.pipe(map(val => val * 10));
+    const intervalResult$ = merge(interval1$, interval2$);
 
-    // intervalResult$.subscribe(console.log);
+    const intervalSub = intervalResult$.subscribe(console.log);
+
+    setTimeout(() => intervalSub.unsubscribe(), 5000);
+    
   }
 
 }
