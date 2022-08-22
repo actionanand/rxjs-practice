@@ -3,6 +3,8 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { concat, interval, merge, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { createHttpObservable } from '../common/util';
+
 
 @Component({
   selector: 'about',
@@ -32,6 +34,13 @@ export class AboutComponent implements OnInit {
     const intervalSub = intervalResult$.subscribe(console.log);
 
     setTimeout(() => intervalSub.unsubscribe(), 5000);
+
+
+    // cancellable http$
+    const http$ = createHttpObservable('/api/courses');
+    const httpSub = http$.subscribe(console.log);
+
+    setTimeout(() => httpSub.unsubscribe(), 0);
     
   }
 
