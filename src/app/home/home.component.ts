@@ -28,13 +28,16 @@ export class HomeComponent implements OnInit {
       tap(() => console.log('Http req executed!')),
       map(resp => Object.values(resp['payload'])),
       shareReplay<Course[]>(),
-      catchError(err => {
-        console.log('Error occurred! ', err);
-        return throwError(err);
-      }),
-      finalize(() => {
-        console.log('Finalized!'); // 'finalize' will be executed either rxjs completed or error ocuured
-      })
+      // catchError(err => {
+      //   console.log('Error occurred! ', err);
+      //   return throwError(err);
+      // }),
+      // finalize(() => {
+      //   console.log('Finalized!'); // 'finalize' will be executed either rxjs completed or error ocuured
+      // }),
+      retryWhen(err => err.pipe(
+        delayWhen(() => timer(2000))
+      ))
     );
 
     this.beginnerCourses$ = courses$.pipe(
