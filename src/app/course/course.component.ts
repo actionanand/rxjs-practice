@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { debounceTime, distinctUntilChanged, startWith, tap, delay, map, concatMap, switchMap, 
   withLatestFrom, concatAll, shareReplay, throttle } from 'rxjs/operators';
-import { merge, fromEvent, Observable, concat, interval } from 'rxjs';
+import { merge, fromEvent, Observable, concat, interval, forkJoin } from 'rxjs';
 
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -38,6 +38,15 @@ export class CourseComponent implements OnInit, AfterViewInit {
     this.lessons$ = this.loadLessons();
 
     setRxjsLoggingLevel(RxjsLoggingLevel.TRACE);
+
+    forkJoin(this.course$, this.lessons$)
+      .pipe(
+        tap(([course, lesson]) => {
+          console.log('Courses : ', course);
+          console.log('Lessons : ', lesson)
+        })
+      )
+      .subscribe()
   }
 
   ngAfterViewInit() {
