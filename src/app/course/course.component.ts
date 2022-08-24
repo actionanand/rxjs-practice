@@ -2,8 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { ActivatedRoute } from '@angular/router';
 
 import { debounceTime, distinctUntilChanged, startWith, tap, delay, map, concatMap, switchMap, 
-  withLatestFrom, concatAll, shareReplay } from 'rxjs/operators';
-import { merge, fromEvent, Observable, concat } from 'rxjs';
+  withLatestFrom, concatAll, shareReplay, throttle } from 'rxjs/operators';
+import { merge, fromEvent, Observable, concat, interval } from 'rxjs';
 
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -52,6 +52,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
         map(event => event.target.value),
         startWith(''), // initial searchTerm is ''
         debounceTime(500),
+        // throttle(() => interval(500)),
         distinctUntilChanged(),
         switchMap(searchTerm => this.loadLessons(searchTerm))
       );
