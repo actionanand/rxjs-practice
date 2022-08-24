@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 
 import { debounceTime, distinctUntilChanged, startWith, tap, delay, map, concatMap, switchMap, 
   withLatestFrom, concatAll, shareReplay, throttle } from 'rxjs/operators';
-import { merge, fromEvent, Observable, concat, interval } from 'rxjs';
+import { merge, fromEvent, Observable, concat, interval, forkJoin } from 'rxjs';
 
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
 import { createHttpObservable } from '../common/util';
+import { debug, RxjsLoggingLevel, setRxjsLoggingLevel } from '../common/debug';
 
 
 @Component({
@@ -29,8 +30,23 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
     this.courseId = this.route.snapshot.params['id'];
 
-    this.course$ = (createHttpObservable(`/api/courses/${this.courseId}`) as Observable<Course>);
+    this.course$ = (createHttpObservable(`/api/courses/${this.courseId}`) as Observable<Course>)
+      .pipe(
+        debug(RxjsLoggingLevel.INFO, 'Courses value')
+      );
+
     this.lessons$ = this.loadLessons();
+
+    setRxjsLoggingLevel(RxjsLoggingLevel.TRACE);
+
+    forkJoin(this.course$, this.lessons$)
+      .pipe(
+        tap(([course, lesson]) => {
+          console.log('Courses : ', course);
+          console.log('Lessons : ', lesson)
+        })
+      )
+      .subscribe()
   }
 
   ngAfterViewInit() {
@@ -51,10 +67,12 @@ export class CourseComponent implements OnInit, AfterViewInit {
       .pipe(
         map(event => event.target.value),
         startWith(''), // initial searchTerm is ''
+        debug(RxjsLoggingLevel.TRACE, 'Search Term'),
         debounceTime(500),
         // throttle(() => interval(500)),
         distinctUntilChanged(),
-        switchMap(searchTerm => this.loadLessons(searchTerm))
+        switchMap(searchTerm => this.loadLessons(searchTerm)),
+        debug(RxjsLoggingLevel.INFO, 'lessons value'),
       );
   }
 
