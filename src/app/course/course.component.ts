@@ -2,8 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { ActivatedRoute } from '@angular/router';
 
 import { debounceTime, distinctUntilChanged, startWith, tap, delay, map, concatMap, switchMap, 
-  withLatestFrom, concatAll, shareReplay } from 'rxjs/operators';
-import { merge, fromEvent, Observable, concat } from 'rxjs';
+  withLatestFrom, concatAll, shareReplay, throttle } from 'rxjs/operators';
+import { merge, fromEvent, Observable, concat, interval } from 'rxjs';
 
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -19,6 +19,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   course$: Observable<Course>;
   lessons$: Observable<Lesson[]>;
+  courseId: string;
 
   @ViewChild('searchInput', { static: true }) input: ElementRef;
 
@@ -26,23 +27,42 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
-    const courseId = this.route.snapshot.params['id'];
+    this.courseId = this.route.snapshot.params['id'];
 
-    this.course$ = (createHttpObservable(`/api/courses/${courseId}`) as Observable<Course>);
-    this.lessons$ = createHttpObservable(`/api/lessons?courseId=${courseId}&pageSize=100`)
-                      .pipe(
-                        map(resp => resp['payload'])
-                      );
+    this.course$ = (createHttpObservable(`/api/courses/${this.courseId}`) as Observable<Course>);
+    this.lessons$ = this.loadLessons();
   }
 
   ngAfterViewInit() {
-    fromEvent<any>(this.input.nativeElement, 'keyup')
+    // const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+    //   .pipe(
+    //     map(event => event.target.value),
+    //     debounceTime(500),
+    //     distinctUntilChanged(),
+    //     switchMap(searchTerm => this.loadLessons(searchTerm))
+    //   );
+
+    // const initialLessons$ = this.loadLessons();
+
+    // this.lessons$ = concat(initialLessons$, searchLessons$);
+
+
+    this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map(event => event.target.value),
+        startWith(''), // initial searchTerm is ''
         debounceTime(500),
-        distinctUntilChanged()
-      )
-      .subscribe(console.log);
+        // throttle(() => interval(500)),
+        distinctUntilChanged(),
+        switchMap(searchTerm => this.loadLessons(searchTerm))
+      );
+  }
+
+  loadLessons(search = ''): Observable<Lesson[]> {
+    return createHttpObservable(`/api/lessons?courseId=${this.courseId}&pageSize=100&filter=${search}`)
+      .pipe(
+        map(resp => resp['payload'])
+      );
   }
 
 }
