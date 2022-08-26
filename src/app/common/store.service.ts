@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
 
 import { BehaviorSubject, Observable, Subject, Subscription, timer } from 'rxjs';
+import { fromPromise } from 'rxjs/internal-compatibility';
 import { delayWhen, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
 
 import { Course } from '../model/course';
@@ -47,6 +48,27 @@ export class Store implements OnInit, OnDestroy {
     return this.courses$.pipe(
       map(resp => resp.filter(course => course.category == grade))
     );
+  }
+
+  onSaveCourse(id: number, changes): Observable<any> {
+    const courses = this.subject.getValue();
+    const courseInd = courses.findIndex(course => course.id === id);
+    const newCourses = courses.slice(0);
+
+    newCourses[courseInd] = {
+      ...newCourses[courseInd], 
+      ...changes
+    };
+
+    this.subject.next(newCourses);
+
+    return fromPromise(fetch(`api/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(changes),
+      headers: {
+        'content-type': 'application/json'
+      }
+    }));
   }
 
   ngOnDestroy(): void {
