@@ -42,15 +42,17 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+  /* 
     this.form.valueChanges
       .pipe(
         filter(() => this.form.valid),
         concatMap(changes => this.saveCourse(changes))
       )
       .subscribe();
-
+  */
   }
 
+/* 
   saveCourse(changes) {
     return fromPromise(fetch(`api/courses/${this.course.id}`, {
       method: 'PUT',
@@ -60,15 +62,16 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
       }
     }));
   }
-
+*/
 
   ngAfterViewInit() {
+  /* 
     fromEvent(this.saveButton.nativeElement, 'click')
       .pipe(
         exhaustMap(() => this.saveCourse(this.form.value))
       )
       .subscribe();
-
+  */
   }
 
   onSave() {
