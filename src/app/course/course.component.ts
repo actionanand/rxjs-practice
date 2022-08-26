@@ -9,6 +9,7 @@ import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
 import { createHttpObservable } from '../common/util';
 import { debug, RxjsLoggingLevel, setRxjsLoggingLevel } from '../common/debug';
+import { Store } from '../common/store.service';
 
 
 @Component({
@@ -24,7 +25,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   @ViewChild('searchInput', { static: true }) input: ElementRef;
 
-  constructor(private route: ActivatedRoute) {  }
+  constructor(private route: ActivatedRoute, private store: Store) {  }
 
   ngOnInit() {
 
@@ -50,18 +51,20 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
-    //   .pipe(
-    //     map(event => event.target.value),
-    //     debounceTime(500),
-    //     distinctUntilChanged(),
-    //     switchMap(searchTerm => this.loadLessons(searchTerm))
-    //   );
+  /* 
+    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+      .pipe(
+        map(event => event.target.value),
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(searchTerm => this.loadLessons(searchTerm))
+      );
 
-    // const initialLessons$ = this.loadLessons();
+    const initialLessons$ = this.loadLessons();
 
-    // this.lessons$ = concat(initialLessons$, searchLessons$);
-
+    this.lessons$ = concat(initialLessons$, searchLessons$);
+    
+  */
 
     this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(

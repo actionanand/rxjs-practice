@@ -71,6 +71,10 @@ export class Store implements OnInit, OnDestroy {
     }));
   }
 
+  onSelectCourseById(id: number) {
+
+  }
+
   ngOnDestroy(): void {
     if (this.courseSub) {
       this.courseSub.unsubscribe();
