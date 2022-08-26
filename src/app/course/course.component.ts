@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { ActivatedRoute } from '@angular/router';
 
 import { debounceTime, distinctUntilChanged, startWith, tap, delay, map, concatMap, switchMap, 
-  withLatestFrom, concatAll, shareReplay, throttle } from 'rxjs/operators';
+  withLatestFrom, concatAll, shareReplay, throttle, first } from 'rxjs/operators';
 import { merge, fromEvent, Observable, concat, interval, forkJoin } from 'rxjs';
 
 import { Course } from '../model/course';
@@ -21,7 +21,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   course$: Observable<Course>;
   lessons$: Observable<Lesson[]>;
-  courseId: string;
+  courseId: number;
 
   @ViewChild('searchInput', { static: true }) input: ElementRef;
 
@@ -29,17 +29,25 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
-    this.courseId = this.route.snapshot.params['id'];
+    this.courseId = +this.route.snapshot.params['id'];
 
+  /*  
     this.course$ = (createHttpObservable(`/api/courses/${this.courseId}`) as Observable<Course>)
       .pipe(
         debug(RxjsLoggingLevel.INFO, 'Courses value')
+      );
+  */
+
+    this.course$ = this.store.onSelectCourseById(this.courseId)
+      .pipe(
+        first()
       );
 
     this.lessons$ = this.loadLessons();
 
     setRxjsLoggingLevel(RxjsLoggingLevel.TRACE);
 
+  /*
     forkJoin(this.course$, this.lessons$)
       .pipe(
         tap(([course, lesson]) => {
@@ -47,7 +55,18 @@ export class CourseComponent implements OnInit, AfterViewInit {
           console.log('Lessons : ', lesson)
         })
       )
-      .subscribe()
+      .subscribe();
+  */
+
+      this.lessons$
+        .pipe(
+          withLatestFrom(this.course$)
+        )
+        .subscribe(([lessons, courses]) => {
+          console.log('Courses : ', courses);
+          console.log('Lessons : ', lessons)
+        });
+
   }
 
   ngAfterViewInit() {
@@ -63,7 +82,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
     const initialLessons$ = this.loadLessons();
 
     this.lessons$ = concat(initialLessons$, searchLessons$);
-    
+
   */
 
     this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')

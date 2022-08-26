@@ -2,7 +2,7 @@ import { Injectable, OnDestroy, OnInit } from '@angular/core';
 
 import { BehaviorSubject, Observable, Subject, Subscription, timer } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { delayWhen, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
+import { delayWhen, filter, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
 
 import { Course } from '../model/course';
 import { createHttpObservable } from './util';
@@ -71,8 +71,11 @@ export class Store implements OnInit, OnDestroy {
     }));
   }
 
-  onSelectCourseById(id: number) {
-
+  onSelectCourseById(id: number): Observable<Course> {
+    return this.courses$.pipe(
+      map(resp => resp.find(course => course.id == id)),
+      filter(course => !!course)  // to prevent undefined in the beginning as we've empty array (subject property), this condition will filterout falsy
+    );
   }
 
   ngOnDestroy(): void {
