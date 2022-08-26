@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 
-import { concat, interval, merge, of } from 'rxjs';
+import { concat, interval, merge, of, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { createHttpObservable } from '../common/util';
@@ -41,6 +41,19 @@ export class AboutComponent implements OnInit {
     const httpSub = http$.subscribe(console.log);
 
     setTimeout(() => httpSub.unsubscribe(), 0);
+
+
+    // subject
+
+    const subject = new Subject();
+
+    const series$ = subject.asObservable();
+
+    series$.subscribe(console.log);
+
+    subject.next(1);
+    subject.next(2);
+    subject.complete();
     
   }
 

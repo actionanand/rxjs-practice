@@ -5,6 +5,7 @@ import { catchError, delayWhen, finalize, map, retryWhen, shareReplay, tap } fro
 
 import { Course } from "../model/course";
 import { createHttpObservable } from '../common/util';
+import { AvailableCourses, Store } from '../common/store.service';
 
 
 @Component({
@@ -17,11 +18,12 @@ export class HomeComponent implements OnInit {
   beginnerCourses$: Observable<Course[]>;
   advancedCourses$: Observable<Course[]>;
 
-  constructor() {
+  constructor(private store: Store) {
 
   }
 
   ngOnInit() {
+  /*
     const http$ = createHttpObservable('/api/courses');
 
     const courses$: Observable<Course[]> = http$.pipe(
@@ -39,14 +41,12 @@ export class HomeComponent implements OnInit {
         delayWhen(() => timer(2000))
       ))
     );
+  */
 
-    this.beginnerCourses$ = courses$.pipe(
-      map(resp => resp.filter(course => course.category == 'BEGINNER'))
-    );
-
-    this.advancedCourses$ = courses$.pipe(
-      map(resp => resp.filter(course => course.category == 'ADVANCED'))
-    );
+    this.beginnerCourses$ = this.store.onSelectCourse(AvailableCourses.beginner);
+    
+    this.advancedCourses$ = this.store.onSelectCourse(AvailableCourses.advanced);
+   
 
     // courses$.subscribe(
     //   (courses: Course[]) => console.log(courses),

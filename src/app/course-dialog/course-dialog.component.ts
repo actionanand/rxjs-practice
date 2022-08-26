@@ -9,6 +9,7 @@ import { fromPromise } from 'rxjs/internal-compatibility';
 import * as moment from 'moment';
 
 import { Course } from '../model/course';
+import { Store } from '../common/store.service';
 
 @Component({
   selector: 'course-dialog',
@@ -26,7 +27,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<CourseDialogComponent>,
+    private dialogRef: MatDialogRef<CourseDialogComponent>, private store: Store,
     @Inject(MAT_DIALOG_DATA) course:Course ) {
 
     this.course = course;
@@ -41,15 +42,17 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+  /* 
     this.form.valueChanges
       .pipe(
         filter(() => this.form.valid),
         concatMap(changes => this.saveCourse(changes))
       )
       .subscribe();
-
+  */
   }
 
+/* 
   saveCourse(changes) {
     return fromPromise(fetch(`api/courses/${this.course.id}`, {
       method: 'PUT',
@@ -59,18 +62,24 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
       }
     }));
   }
-
+*/
 
   ngAfterViewInit() {
+  /* 
     fromEvent(this.saveButton.nativeElement, 'click')
       .pipe(
         exhaustMap(() => this.saveCourse(this.form.value))
       )
       .subscribe();
-
+  */
   }
 
-
+  onSave() {
+    this.store.onSaveCourse(this.course.id, this.form.value).subscribe(
+      () => this.close(),
+      err => console.log('An error occurred while saving. ', err)
+    );
+  }
 
   close() {
     this.dialogRef.close();
